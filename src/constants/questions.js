@@ -1,0 +1,423 @@
+// 问卷数据结构 - 完整题目列表
+export const questions = [
+  {
+    id: 'extroversion',
+    title: '社交互动风格',
+    questions: [
+      {
+        id: 'q1_1',
+        text: '参加了一整天的聚会或社交活动后，您通常会：',
+        type: 'choice',
+        dimension: 'extroversion',
+        options: [
+          { value: 'A', label: 'A. 感到精力充沛，希望活动能继续进行' },
+          { value: 'B', label: 'B. 适度疲惫，但总体享受其中' },
+          { value: 'C', label: 'C. 社交能量消耗殆尽，需要独处恢复' },
+          { value: 'D', label: 'D. 社交前就感到焦虑，活动中也很难放松' },
+        ],
+      },
+      {
+        id: 'q1_2',
+        text: '关于您的人际关系网络，哪种描述最准确？',
+        type: 'choice',
+        dimension: 'extroversion',
+        options: [
+          { value: 'A', label: 'A. 广泛的社交圈，认识很多人并经常扩展人脉' },
+          { value: 'B', label: 'B. 中等范围的社交圈，既有核心朋友也有普通熟人' },
+          { value: 'C', label: 'C. 小而紧密的朋友圈，几个深交的好友' },
+          { value: 'D', label: 'D. 非常有限的社交圈，可能只有1-2个亲密朋友' },
+        ],
+      },
+      {
+        id: 'q1_3',
+        text: '在不熟悉的社交场合（如聚会上遇到陌生人），您通常会：',
+        type: 'choice',
+        dimension: 'extroversion',
+        options: [
+          { value: 'A', label: 'A. 主动介绍自己并开始交谈，轻松融入环境' },
+          { value: 'B', label: 'B. 需要一点时间观察，然后能较自然地加入对话' },
+          { value: 'C', label: 'C. 倾向等待他人主动与您交谈，再慢慢参与' },
+          { value: 'D', label: 'D. 尽量避免与陌生人的互动，寻找熟悉的人或安静角落' },
+        ],
+      },
+      {
+        id: 'q1_4',
+        text: '关于您的想法表达，下列哪项最符合您的特点？',
+        type: 'choice',
+        dimension: 'extroversion',
+        options: [
+          { value: 'A', label: 'A. 常常边思考边说出想法，通过交流发展想法' },
+          { value: 'B', label: 'B. 思考后愿意分享，但会控制表达的程度和方式' },
+          { value: 'C', label: 'C. 经过充分思考后才会选择性地表达重要想法' },
+          { value: 'D', label: 'D. 很多想法保留在心里，很少对外表达' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'planning',
+    title: '计划与灵活性',
+    questions: [
+      {
+        id: 'q2_1',
+        text: '关于日常安排，哪种描述最符合您的风格？',
+        type: 'choice',
+        dimension: 'planning',
+        options: [
+          { value: 'A', label: 'A. 详细规划每天的时间表，严格执行计划' },
+          { value: 'B', label: 'B. 列出日程要点，但保留一定灵活性' },
+          { value: 'C', label: 'C. 简单安排重要事项，其他随机应变' },
+          { value: 'D', label: 'D. 很少做计划，根据当下感受和情况决定' },
+        ],
+      },
+      {
+        id: 'q2_2',
+        text: '计划一次旅行，您会：',
+        type: 'choice',
+        dimension: 'planning',
+        options: [
+          { value: 'A', label: 'A. 提前数周规划行程，预订所有住宿和活动' },
+          { value: 'B', label: 'B. 确定大致行程框架和必去景点，保留一些自由时间' },
+          { value: 'C', label: 'C. 只规划出发日期和住宿，其他活动随机决定' },
+          { value: 'D', label: 'D. 尽量即兴出发，享受无计划的探索和意外发现' },
+        ],
+      },
+      {
+        id: 'q2_3',
+        text: '完成一项复杂工作任务时，您通常：',
+        type: 'choice',
+        dimension: 'planning',
+        options: [
+          { value: 'A', label: 'A. 制定详细计划，分解为小任务，按步骤严格执行' },
+          { value: 'B', label: 'B. 设定总体框架和关键节点，在执行中灵活调整细节' },
+          { value: 'C', label: 'C. 有大致方向，但更依赖进行中的灵感和调整' },
+          { value: 'D', label: 'D. 依靠直觉和当下感受，采用跳跃式思维解决问题' },
+        ],
+      },
+      {
+        id: 'q2_4',
+        text: '当原定计划需要临时变更时：',
+        type: 'choice',
+        dimension: 'planning',
+        options: [
+          { value: 'A', label: 'A. 感到明显不适，努力维持原计划或尽快制定新计划' },
+          { value: 'B', label: 'B. 略有不适，但能迅速调整并适应变化' },
+          { value: 'C', label: 'C. 泰然处之，认为变化是常态' },
+          { value: 'D', label: 'D. 欢迎变化，甚至主动寻求改变常规的机会' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'rationality',
+    title: '思维与决策方式',
+    questions: [
+      {
+        id: 'q3_1',
+        text: '面对重要决定（如工作选择），您主要依靠：',
+        type: 'choice',
+        dimension: 'rationality',
+        options: [
+          { value: 'A', label: 'A. 详尽的数据分析和利弊权衡' },
+          { value: 'B', label: 'B. 理性分析为主，但也考虑个人感受' },
+          { value: 'C', label: 'C. 直觉和感受为主，辅以合理性检验' },
+          { value: 'D', label: 'D. 几乎完全依靠直觉和内心感受' },
+        ],
+      },
+      {
+        id: 'q3_2',
+        text: '在重要话题的沟通中，您更看重：',
+        type: 'choice',
+        dimension: 'rationality',
+        options: [
+          { value: 'A', label: 'A. 逻辑严密，观点清晰，信息准确' },
+          { value: 'B', label: 'B. 既有逻辑也有共鸣，平衡理性与感性' },
+          { value: 'C', label: 'C. 情感连接和真实表达，强调共情' },
+          { value: 'D', label: 'D. 表达内心感受，分享个人体验' },
+        ],
+      },
+      {
+        id: 'q3_3',
+        text: '做购物决定时，您通常：',
+        type: 'choice',
+        dimension: 'rationality',
+        options: [
+          { value: 'A', label: 'A. 对比产品参数和评价，选择最符合需求的' },
+          { value: 'B', label: 'B. 考虑功能和需求，但也受品牌和设计影响' },
+          { value: 'C', label: 'C. 主要看感觉和喜好，适当参考一些客观因素' },
+          { value: 'D', label: 'D. 根据第一印象和直觉购买自己喜欢的' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'independence',
+    title: '独立性与关系依存',
+    questions: [
+      {
+        id: 'q4_1',
+        text: '对于日常生活事务（饮食、家务、财务等），您：',
+        type: 'choice',
+        dimension: 'independence',
+        options: [
+          { value: 'A', label: 'A. 高度独立，几乎所有事情都自己处理' },
+          { value: 'B', label: 'B. 大部分能自理，重要事务会共同商议' },
+          { value: 'C', label: 'C. 基本自理，但喜欢与他人分担责任' },
+          { value: 'D', label: 'D. 依赖他人协助处理多数日常事务' },
+        ],
+      },
+      {
+        id: 'q4_2',
+        text: '做人生重要决定时，您会：',
+        type: 'choice',
+        dimension: 'independence',
+        options: [
+          { value: 'A', label: 'A. 独立判断，很少征求他人意见' },
+          { value: 'B', label: 'B. 自己做主但会咨询信任的人' },
+          { value: 'C', label: 'C. 重视他人建议，参考后再决定' },
+          { value: 'D', label: 'D. 高度依赖重要他人的意见和建议' },
+        ],
+      },
+      {
+        id: 'q4_3',
+        text: '在亲密关系中，您对情感联系的需求是：',
+        type: 'choice',
+        dimension: 'independence',
+        options: [
+          { value: 'A', label: 'A. 高度独立，需要大量个人空间' },
+          { value: 'B', label: 'B. 适度联系，平衡亲密和独处' },
+          { value: 'C', label: 'C. 倾向频繁互动，但能短时独处' },
+          { value: 'D', label: 'D. 需要持续的情感确认和亲密接触' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'openness',
+    title: '开放性与新体验',
+    questions: [
+      {
+        id: 'q5_1',
+        text: '面对从未尝试过的活动或体验，您通常：',
+        type: 'choice',
+        dimension: 'openness',
+        options: [
+          { value: 'A', label: 'A. 积极尝试，享受探索未知的乐趣' },
+          { value: 'B', label: 'B. 保持开放，在评估风险后尝试' },
+          { value: 'C', label: 'C. 谨慎观望，在熟悉后可能尝试' },
+          { value: 'D', label: 'D. 倾向回避，优先选择熟悉的活动' },
+        ],
+      },
+      {
+        id: 'q5_2',
+        text: '对于与您现有观点完全不同的新理念：',
+        type: 'choice',
+        dimension: 'openness',
+        options: [
+          { value: 'A', label: 'A. 好奇探索，愿意重新思考自己的立场' },
+          { value: 'B', label: 'B. 保持开放，在了解后可能调整看法' },
+          { value: 'C', label: 'C. 审慎评估，需要充分证据才会接受' },
+          { value: 'D', label: 'D. 倾向维持原有观点，不易被说服' },
+        ],
+      },
+      {
+        id: 'q5_3',
+        text: '对于与您背景不同的文化习俗和生活方式：',
+        type: 'choice',
+        dimension: 'openness',
+        options: [
+          { value: 'A', label: 'A. 积极了解并尝试融入，享受多元体验' },
+          { value: 'B', label: 'B. 尊重差异，愿意适度体验和学习' },
+          { value: 'C', label: 'C. 基本尊重但保持距离，优先自身文化习惯' },
+          { value: 'D', label: 'D. 倾向坚持自己习惯的方式，很少尝试改变' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'risk_taking',
+    title: '风险态度',
+    questions: [
+      {
+        id: 'q6_1',
+        text: '关于投资理财，您的态度是：',
+        type: 'choice',
+        dimension: 'risk_taking',
+        options: [
+          { value: 'A', label: 'A. 积极寻求高回报机会，能接受相应高风险' },
+          { value: 'B', label: 'B. 适度冒险，平衡风险和收益' },
+          { value: 'C', label: 'C. 谨慎为主，少量尝试风险投资' },
+          { value: 'D', label: 'D. 极度保守，安全稳健是首要考虑' },
+        ],
+      },
+      {
+        id: 'q6_2',
+        text: '如果有机会尝试刺激性活动（如高空跳伞、攀岩），您会：',
+        type: 'choice',
+        dimension: 'risk_taking',
+        options: [
+          { value: 'A', label: 'A. 毫不犹豫参与，享受刺激和挑战' },
+          { value: 'B', label: 'B. 在确保安全措施的情况下尝试' },
+          { value: 'C', label: 'C. 犹豫再三，可能在他人鼓励下参与' },
+          { value: 'D', label: 'D. 几乎肯定拒绝，避免此类风险活动' },
+        ],
+      },
+      {
+        id: 'q6_3',
+        text: '面对职业选择，您更可能：',
+        type: 'choice',
+        dimension: 'risk_taking',
+        options: [
+          { value: 'A', label: 'A. 选择有挑战性的新领域，即使前景不确定' },
+          { value: 'B', label: 'B. 在保持一定安全底线的情况下尝试新机会' },
+          { value: 'C', label: 'C. 优先考虑稳定性，小步探索可能的发展' },
+          { value: 'D', label: 'D. 坚持最熟悉的领域和稳定的职业路径' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'emotional_stability',
+    title: '情绪稳定性',
+    questions: [
+      {
+        id: 'q7_1',
+        text: '您的日常情绪状态通常是：',
+        type: 'choice',
+        dimension: 'emotional_stability',
+        options: [
+          { value: 'A', label: 'A. 非常稳定，很少有明显波动' },
+          { value: 'B', label: 'B. 较为平稳，偶有起伏但能很快恢复' },
+          { value: 'C', label: 'C. 有一定波动，随环境和事件明显变化' },
+          { value: 'D', label: 'D. 波动较大，容易受外界影响产生强烈情绪' },
+        ],
+      },
+      {
+        id: 'q7_2',
+        text: '面对高压力情境（如重要考试、工作挑战），您通常：',
+        type: 'choice',
+        dimension: 'emotional_stability',
+        options: [
+          { value: 'A', label: 'A. 保持冷静和高效，压力反而提升表现' },
+          { value: 'B', label: 'B. 感受到压力但能有效管理，不影响功能' },
+          { value: 'C', label: 'C. 明显感到压力和焦虑，需要额外调适' },
+          { value: 'D', label: 'D. 容易被压力压垮，影响正常发挥' },
+        ],
+      },
+      {
+        id: 'q7_3',
+        text: '遭遇明显挫折或失败后，您通常需要：',
+        type: 'choice',
+        dimension: 'emotional_stability',
+        options: [
+          { value: 'A', label: 'A. 短时间即可调整心态，迅速重新出发' },
+          { value: 'B', label: 'B. 一段时间消化情绪，然后能正面应对' },
+          { value: 'C', label: 'C. 较长时间恢复，需要支持才能重建信心' },
+          { value: 'D', label: 'D. 深受打击，可能长期影响信心和行动' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'responsibility',
+    title: '责任感与可靠性',
+    questions: [
+      {
+        id: 'q8_1',
+        text: '当您对他人做出承诺后：',
+        type: 'choice',
+        dimension: 'responsibility',
+        options: [
+          { value: 'A', label: 'A. 无论环境如何变化，都会尽全力履行' },
+          { value: 'B', label: 'B. 认真对待并通常会完成，特殊情况会沟通调整' },
+          { value: 'C', label: 'C. 努力完成，但可能根据情况变化而灵活处理' },
+          { value: 'D', label: 'D. 视当时情况而定，认为承诺可以灵活变通' },
+        ],
+      },
+      {
+        id: 'q8_2',
+        text: '在团队合作中，您通常：',
+        type: 'choice',
+        dimension: 'responsibility',
+        options: [
+          { value: 'A', label: 'A. 主动承担责任，确保团队目标达成' },
+          { value: 'B', label: 'B. 认真完成自己的部分，并在必要时协助他人' },
+          { value: 'C', label: 'C. 完成分配的任务，但很少主动承担额外责任' },
+          { value: 'D', label: 'D. 倾向于完成最低要求，避免过多责任' },
+        ],
+      },
+      {
+        id: 'q8_3',
+        text: '关于个人计划和目标，您的执行情况是：',
+        type: 'choice',
+        dimension: 'responsibility',
+        options: [
+          { value: 'A', label: 'A. 严格自律，几乎总能按计划完成目标' },
+          { value: 'B', label: 'B. 大部分时间保持自律，偶有放松' },
+          { value: 'C', label: 'C. 执行情况时好时坏，需要外部督促' },
+          { value: 'D', label: 'D. 经常推迟或放弃，难以坚持长期目标' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'empathy',
+    title: '共情能力',
+    questions: [
+      {
+        id: 'q9_1',
+        text: '当与他人交流时，您能察觉到对方未明说的情绪：',
+        type: 'choice',
+        dimension: 'empathy',
+        options: [
+          { value: 'A', label: 'A. 几乎总能准确感知，即使微妙的情绪变化' },
+          { value: 'B', label: 'B. 通常能察觉明显的情绪信号' },
+          { value: 'C', label: 'C. 有时能注意到，但经常会忽略细微变化' },
+          { value: 'D', label: 'D. 很少关注情绪信号，主要关注内容本身' },
+        ],
+      },
+      {
+        id: 'q9_2',
+        text: '朋友向您倾诉困难时，您的反应通常是：',
+        type: 'choice',
+        dimension: 'empathy',
+        options: [
+          { value: 'A', label: 'A. 完全投入倾听，理解他们的感受并给予情感支持' },
+          { value: 'B', label: 'B. 认真倾听，尝试提供情感支持和实际建议' },
+          { value: 'C', label: 'C. 倾听后主要提供解决方案和客观建议' },
+          { value: 'D', label: 'D. 简单听取后直接给出您认为最有效的解决方法' },
+        ],
+      },
+      {
+        id: 'q9_3',
+        text: '面对与您观点完全相反的人，您通常：',
+        type: 'choice',
+        dimension: 'empathy',
+        options: [
+          { value: 'A', label: 'A. 能理解并尊重他们的视角，即使不认同' },
+          { value: 'B', label: 'B. 尝试理解他们的出发点，寻找共同点' },
+          { value: 'C', label: 'C. 倾听但难以理解，坚持自己的立场' },
+          { value: 'D', label: 'D. 很难接受对立观点，倾向于反驳或回避' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'confidence',
+    title: '自信水平',
+    questions: [
+      {
+        id: 'q10_1',
+        text: '面对挑战性任务或陌生环境，您的信心水平：',
+        type: 'choice',
+        dimension: 'confidence',
+        options: [
+          { value: 'A', label: 'A. 高度自信，相信自己能出色应对各种情况' },
+          { value: 'B', label: 'B. 相对自信，对自己的核心能力有信心' },
+          { value: 'C', label: 'C. 中等自信，在熟悉领域较有把握，新环境则忐忑' },
+          { value: 'D', label: 'D. 自信不足，经常质疑自己的能力和决定' },
+        ],
+      },
+    ],
+  },
+];
