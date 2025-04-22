@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import PhotoAnalysis from '@/views/PhotoAnalysis.vue';
 import QuestionnaireView from '@/views/QuestionnaireView.vue';
 import ResultView from '@/views/ResultView.vue';
+import Survey from '@/views/Survey.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/results',
       name: 'results',
       component: ResultView,
+    },
+    {
+      path: '/survey',
+      name: 'survey',
+      component: Survey,
     },
   ],
 });
