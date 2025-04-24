@@ -61,7 +61,7 @@
 import { ref, computed, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import QuestionItem from '../components/QuestionItem.vue';
-import { submitAnswers } from '../services/api';
+// import { submitAnswers } from '../services/api';
 import { questions } from '../constants/questions.js';
 
 const router = useRouter();
@@ -107,28 +107,27 @@ const prevSection = () => {
   }
 };
 
-const submitQuestionnaire = async () => {
-  if (!isFormComplete.value) return;
+// const submitQuestionnaire = async () => {
+//   if (!isFormComplete.value) return;
 
-  try {
-    isLoading.value = true;
-    const result = await submitAnswers(answers);
-    console.log(result, 'result');
+//   try {
+//     isLoading.value = true;
+//     const result = await submitAnswers(answers);
+//     console.log(result, 'result');
 
-
-    // 跳转到结果页面
-    router.push({
-      name: 'results',
-      params: { id: result.id },
-      state: { result },
-    });
-  } catch (error) {
-    console.error('提交失败:', error);
-    // alert('提交失败，请稍后重试');
-  } finally {
-    isLoading.value = false;
-  }
-};
+//     // 跳转到结果页面
+//     router.push({
+//       name: 'results',
+//       params: { id: result.id },
+//       state: { result },
+//     });
+//   } catch (error) {
+//     console.error('提交失败:', error);
+//     // alert('提交失败，请稍后重试');
+//   } finally {
+//     isLoading.value = false;
+//   }
+// };
 
 // 初始化默认答案
 onMounted(() => {

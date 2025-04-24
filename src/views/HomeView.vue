@@ -1,5 +1,5 @@
 <template>
-  <main>1111</main>
+  <main>欢迎进入</main>
 </template>
 
 <script setup></script>
