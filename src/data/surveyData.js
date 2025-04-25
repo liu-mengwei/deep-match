@@ -256,6 +256,18 @@ export default {
             { value: 'suppress', label: '压抑不表达' },
           ],
         },
+        {
+          id: 'partner_emotion_expression',
+          type: 'radio',
+          label: '您希望伴侣如何表达情绪',
+          required: true,
+          options: [
+            { value: 'direct', label: '直接表达不隐藏' },
+            { value: 'moderate', label: '适度表达' },
+            { value: 'internalize', label: '内化处理' },
+            { value: 'suppress', label: '压抑不表达' },
+          ],
+        },
       ],
     },
     {

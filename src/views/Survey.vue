@@ -1,5 +1,6 @@
 <template>
   <div class="survey-app">
+    <div class="nickname">{{ authStore.currentUser.phone }}</div>
     <header class="app-header">
       <h1>{{ surveyData.title }}</h1>
       <div class="progress-indicator" v-if="currentStep !== 'welcome'">
@@ -11,7 +12,7 @@
           }"
           @click="goToStep('questions')"
         >
-          问卷填写
+          基本信息
         </div>
         <div
           class="step"
@@ -107,6 +108,16 @@ import surveyData from '../data/surveyData.js';
 // 导入API服务
 import apiService from '../services/apiService';
 import BasicFilter from '../components/survey/BasicFilter/index.vue';
+import { useAuthStore } from '@/stores/auth';
+import {
+  getSurveyDraft,
+  saveSurveyDraft,
+  deleteSurveyDraft,
+  submitSurvey as submit,
+  getSubmittedSurvey,
+} from '@/services/survey';
+
+const authStore = useAuthStore();
 
 // 当前状态: 'welcome', 'questions', 'basicFilter', 'weights', 'results'
 const currentStep = ref('welcome');
@@ -151,12 +162,7 @@ const totalWeight = computed(() => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    // 获取当前用户信息
-    const user = await apiService.getCurrentUser();
-    if (user) {
-      userId.value = user.id;
-    }
-
+    debugger;
     // 检查是否有草稿
     await checkForDraft();
   } catch (error) {
@@ -169,7 +175,7 @@ onMounted(async () => {
 // 检查用户是否有保存的草稿
 const checkForDraft = async () => {
   try {
-    const draft = await apiService.getSurveyDraft();
+    const draft = await getSurveyDraft();
     if (draft && draft.answers) {
       hasDraft.value = true;
     }
@@ -181,7 +187,7 @@ const checkForDraft = async () => {
 // 加载草稿数据
 const loadDraft = async () => {
   try {
-    const draft = await apiService.getSurveyDraft();
+    const draft = await getSurveyDraft();
     if (draft) {
       if (draft.answers) {
         userAnswers.value = draft.answers;
@@ -236,7 +242,7 @@ const saveDraft = async (answers) => {
       weights: userWeights.value,
     };
 
-    await apiService.saveSurveyDraft(draftData);
+    await saveSurveyDraft(draftData);
   } catch (error) {
     console.error('保存草稿失败:', error);
     // 可以添加失败提示
@@ -279,14 +285,14 @@ const submitSurvey = async () => {
     };
 
     // 发送API请求
-    const response = await apiService.submitSurvey(submitData);
+    const response = await submit(submitData);
 
     if (response.success) {
       submitResult.value = response;
       currentStep.value = 'results';
 
       // 提交成功后清除草稿
-      await apiService.deleteSurveyDraft();
+      await deleteSurveyDraft();
     } else {
       throw new Error('提交失败');
     }
@@ -324,6 +330,12 @@ const goToStep = (step) => {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   background-color: #fff;
   border-radius: 8px;
+
+  .nickname {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+  }
 }
 
 .app-header {

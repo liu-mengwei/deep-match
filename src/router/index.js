@@ -4,6 +4,7 @@ import PhotoAnalysis from '@/views/PhotoAnalysis.vue';
 import QuestionnaireView from '@/views/QuestionnaireView.vue';
 import ResultView from '@/views/ResultView.vue';
 import Survey from '@/views/Survey.vue';
+import { clearInvalidToken, isTokenValid } from '@/utils/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -78,21 +79,19 @@ const router = createRouter({
 });
 
 // 路由守卫
-// router.beforeEach((to, from, next) => {
-//   debugger;
-//   const isAuthenticated = localStorage.getItem('token') !== null;
+router.beforeEach((to, from, next) => {
+  // 清除已过期的token
+  clearInvalidToken();
 
-//   if (to.meta.requiresAuth && !isAuthenticated) {
-//     next({ name: 'Login' });
-//   } else if (
-//     !to.meta.requiresAuth &&
-//     isAuthenticated &&
-//     (to.name === 'Login' || to.name === 'Register')
-//   ) {
-//     next({ name: 'Home' });
-//   } else {
-//     next();
-//   }
-// });
+  // 使用更精确的验证方法
+  debugger;
+  const isAuthenticated = isTokenValid();
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'Login' });
+  } else {
+    next();
+  }
+});
 
 export default router;

@@ -10,22 +10,22 @@ const apiClient = axios.create({
 });
 
 // 请求拦截器 - 可选，用于添加认证令牌等
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     // 从本地存储获取令牌
-//     const token = localStorage.getItem('token');
+apiClient.interceptors.request.use(
+  (config) => {
+    // 从本地存储获取令牌
+    const token = localStorage.getItem('token');
 
-//     // 如果令牌存在，添加到请求头
-//     if (token) {
-//       config.headers['Authorization'] = `Bearer ${token}`;
-//     }
+    // 如果令牌存在，添加到请求头
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
 
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   },
-// );
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 // 响应拦截器 - 直接返回 response.data
 apiClient.interceptors.response.use(

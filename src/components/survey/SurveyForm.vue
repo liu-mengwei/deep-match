@@ -43,7 +43,7 @@
       </div>
 
       <button class="primary-button" @click="nextSection">
-        {{ isLastSection ? '完成问卷' : '下一部分' }}
+        {{ isLastSection ? '提交' : '下一部分' }}
       </button>
     </div>
   </div>
