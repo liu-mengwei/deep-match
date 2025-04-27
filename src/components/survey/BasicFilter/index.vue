@@ -212,11 +212,14 @@ const loadDraft = () => {
 
 // 保存草稿
 const saveDraft = async () => {
-  emit('save-draft', {
+  // 准备要保存的数据对象
+  const basicFilterData = {
     preferences: { ...preferences },
-    // 可以添加其他需要保存的数据
     lastUpdated: new Date().toISOString(),
-  });
+  };
+
+  // 调用父组件的save-draft方法，传递BasicFilter数据
+  emit('save-draft', basicFilterData, 'basicFilter');
 };
 
 // 下一步

@@ -8,7 +8,7 @@
           class="step"
           :class="{
             active: currentStep === 'questions',
-            completed: surveyCompleted,
+            completed: basicInfoCompleted,
           }"
           @click="goToStep('questions')"
         >
@@ -18,10 +18,10 @@
           class="step"
           :class="{
             active: currentStep === 'basicFilter',
-            clickable: surveyCompleted,
-            disabled: !surveyCompleted,
+            clickable: basicInfoCompleted,
+            disabled: !basicInfoCompleted,
           }"
-          @click="surveyCompleted && goToStep('basicFilter')"
+          @click="basicInfoCompleted && goToStep('basicFilter')"
         >
           基本条件筛选
         </div>
@@ -29,10 +29,10 @@
           class="step"
           :class="{
             active: currentStep === 'weights',
-            clickable: surveyCompleted,
-            disabled: !surveyCompleted,
+            clickable: basicInfoCompleted,
+            disabled: !basicInfoCompleted,
           }"
-          @click="surveyCompleted && goToStep('weights')"
+          @click="basicInfoCompleted && goToStep('weights')"
         >
           深度匹配设置
         </div>
@@ -67,7 +67,7 @@
       <SurveyForm
         v-if="currentStep === 'questions'"
         :survey-data="surveyData"
-        :initial-answers="userAnswers"
+        :initial-answers="basicInfo"
         @complete="completeSurvey"
         @save-draft="saveDraft"
       />
@@ -113,25 +113,26 @@ import BasicFilter from '../components/survey/BasicFilter/index.vue';
 import { useAuthStore } from '@/stores/auth';
 import {
   getSurveyDraft,
-  saveSurveyDraft,
   deleteSurveyDraft,
   submitSurvey as submit,
-  getSubmittedSurvey,
+  updateSurveyDraft,
+  createSurveyDraft,
 } from '@/services/survey';
 
 const authStore = useAuthStore();
 
 // 当前状态: 'welcome', 'questions', 'basicFilter', 'weights', 'results'
 const currentStep = ref('welcome');
-const userAnswers = ref({});
+const basicInfo = ref({}); // 之前的 userAnswers
 const userWeights = ref({});
 const submitResult = ref(null);
 const isSubmitting = ref(false);
 const hasDraft = ref(false);
-const userId = ref(null);
 const isLoading = ref(true);
 // 添加问卷完成状态
-const surveyCompleted = ref(false);
+const basicInfoCompleted = ref(false);
+// 新增 basicFilter 变量
+const basicFilter = ref({});
 
 // 筛选出需要设置权重的部分（排除基本信息和个人习惯）
 const weightableSections = computed(() => {
@@ -164,8 +165,7 @@ const totalWeight = computed(() => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    debugger;
-    // 检查是否有草稿
+    // 检查是否有草稿，并根据结果设置草稿状态标志
     await checkForDraft();
   } catch (error) {
     console.error('初始化错误:', error);
@@ -178,11 +178,28 @@ onMounted(async () => {
 const checkForDraft = async () => {
   try {
     const draft = await getSurveyDraft();
-    if (draft && draft.answers) {
+    if (draft) {
       hasDraft.value = true;
+      // 预加载草稿数据，避免后续重复加载
+      if (draft.basicInfo) {
+        basicInfo.value = draft.basicInfo;
+      }
+      if (draft.basicFilter) {
+        basicFilter.value = draft.basicFilter; // 存储basicFilter数据，如果有的话
+      }
+      if (draft.weights) {
+        userWeights.value = draft.weights;
+      } else {
+        initializeWeights(); // 如果没有权重数据，则初始化默认权重
+      }
+    } else {
+      hasDraft.value = false;
+      initializeWeights(); // 初始化默认权重
     }
   } catch (error) {
     console.error('获取草稿失败:', error);
+    hasDraft.value = false;
+    initializeWeights(); // 发生错误时，初始化默认权重
   }
 };
 
@@ -191,8 +208,9 @@ const loadDraft = async () => {
   try {
     const draft = await getSurveyDraft();
     if (draft) {
-      if (draft.answers) {
-        userAnswers.value = draft.answers;
+      // 使用新的变量名
+      if (draft.basicInfo) {
+        basicInfo.value = draft.basicInfo;
       }
       if (draft.weights) {
         userWeights.value = draft.weights;
@@ -214,65 +232,112 @@ const startSurvey = async (useDraft) => {
     await loadDraft();
   } else {
     // 初始化空答案
-    userAnswers.value = {};
+    basicInfo.value = {};
     surveyData.sections.forEach((section) => {
       section.questions.forEach((question) => {
         if (question.type === 'checkbox') {
-          userAnswers.value[question.id] = [];
+          basicInfo.value[question.id] = [];
         } else if (question.type === 'rating') {
-          userAnswers.value[question.id] = null;
+          basicInfo.value[question.id] = null;
         } else if (question.type === 'range') {
-          userAnswers.value[question.id] = { min: null, max: null };
+          basicInfo.value[question.id] = { min: null, max: null };
         } else {
-          userAnswers.value[question.id] = '';
+          basicInfo.value[question.id] = '';
         }
       });
     });
     initializeWeights();
   }
-  surveyCompleted.value = false;
+  basicInfoCompleted.value = false;
   currentStep.value = 'questions';
 };
 
-// 保存草稿
-const saveDraft = async (answers) => {
-  userAnswers.value = answers;
+// 修改保存草稿方法
+const saveDraft = async (answers, step) => {
+  // 根据当前步骤更新对应的数据
+  if (step === 'questions' || currentStep.value === 'questions') {
+    basicInfo.value = answers;
+  }
 
   try {
-    const draftData = {
-      answers: userAnswers.value,
-      weights: userWeights.value,
-    };
+    // 构建根据当前步骤的草稿数据
+    let draftData = {};
 
-    await saveSurveyDraft(draftData);
+    if (currentStep.value === 'questions') {
+      draftData = {
+        basicInfo: basicInfo.value,
+      };
+    } else if (currentStep.value === 'basicFilter') {
+      draftData = {
+        basicFilter: answers,
+      };
+    } else if (currentStep.value === 'weights') {
+      draftData = {
+        weights: userWeights.value,
+      };
+    } else {
+      // 默认情况下保存所有数据
+      draftData = {
+        basicInfo: basicInfo.value,
+        weights: userWeights.value,
+      };
+    }
+
+    // 调用新的保存草稿方法
+    await saveDraftWithCheck(draftData);
   } catch (error) {
     console.error('保存草稿失败:', error);
     // 可以添加失败提示
   }
 };
 
+// 添加检查草稿存在的方法
+const saveDraftWithCheck = async (draftData) => {
+  try {
+    // 使用hasDraft的状态值来决定是创建还是更新
+    if (hasDraft.value) {
+      // 已有草稿，使用更新接口
+      await updateSurveyDraft(draftData);
+    } else {
+      // 没有草稿，使用创建接口
+      await createSurveyDraft(draftData);
+      // 设置状态为已有草稿
+      hasDraft.value = true;
+    }
+  } catch (error) {
+    console.error('保存草稿失败:', error);
+    throw error;
+  }
+};
+
 // 完成问卷，进入权重设置
 const completeSurvey = (answers) => {
-  userAnswers.value = answers;
-  surveyCompleted.value = true; // 标记问卷已完成
+  basicInfo.value = answers;
+  basicInfoCompleted.value = true; // 标记问卷已完成
   currentStep.value = 'basicFilter';
   // 自动保存草稿
   saveDraft(answers);
 };
 
-const completeFilter = () => {};
+// 完成 basicFilter 部分，进入权重设置
+const completeFilter = (filterData) => {
+  basicFilter.value = filterData;
+  currentStep.value = 'weights';
+  // 自动保存草稿
+  saveDraft(filterData, 'basicFilter');
+};
 
 // 从权重设置返回问卷填写页（保留数据）
 const backToSurvey = () => {
   currentStep.value = 'questions';
-  // 不需要重新设置userAnswers，因为它已经包含用户填写的数据
+  // 不需要重新设置basicInfo，因为它已经包含用户填写的数据
 };
 
 // 更新权重设置
 const updateWeights = (weights) => {
   userWeights.value = weights;
   // 自动保存草稿
-  saveDraft(userAnswers.value);
+  saveDraft(basicInfo.value);
 };
 
 // 提交问卷及权重
@@ -282,7 +347,8 @@ const submitSurvey = async () => {
   try {
     // 构建提交数据
     const submitData = {
-      answers: userAnswers.value,
+      basicInfo: basicInfo.value,
+      basicFilter: basicFilter.value,
       weights: userWeights.value,
     };
 
@@ -309,7 +375,7 @@ const submitSurvey = async () => {
 // 新增：直接跳转到指定步骤
 const goToStep = (step) => {
   // 只有问卷完成后才能跳转到权重设置
-  if (step === 'weights' && !surveyCompleted.value) {
+  if (step === 'weights' && !basicInfoCompleted.value) {
     return;
   }
 

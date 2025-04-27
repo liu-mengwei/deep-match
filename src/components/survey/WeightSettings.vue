@@ -38,7 +38,7 @@
               type="number"
               :id="`weight_${section.id}`"
               :value="weights[section.id]"
-              @input="(e) => updateWeight(section.id, e.target.value)"
+              @input="(e) => handleWeightUpdate(section.id, parseInt(e.target.value))"
               min="0"
               max="100"
               class="weight-input"
@@ -50,7 +50,7 @@
             <input
               type="range"
               :value="weights[section.id]"
-              @input="(e) => updateWeight(section.id, e.target.value)"
+              @input="(e) => handleWeightUpdate(section.id, parseInt(e.target.value))"
               min="0"
               max="100"
               class="weight-slider"
@@ -96,7 +96,7 @@ const props = defineProps({
 });
 
 // 定义emit
-const emit = defineEmits(['update-weights', 'submit', 'back']);
+const emit = defineEmits(['update-weights', 'submit', 'back', 'save-draft']);
 
 const isValid = computed(() => {
   return props.totalWeight === 100;
@@ -114,13 +114,22 @@ const statusClass = computed(() => {
   return 'balanced';
 });
 
-const updateWeight = (sectionId, value) => {
-  const newValue = parseInt(value);
-  if (isNaN(newValue) || newValue < 0) return;
-
+// 处理权重更新
+const handleWeightUpdate = (sectionId, newWeight) => {
+  // 更新指定部分的权重
   const newWeights = { ...props.weights };
-  newWeights[sectionId] = newValue;
+  newWeights[sectionId] = newWeight;
+
+  // 触发父组件中的更新方法
   emit('update-weights', newWeights);
+
+  // 自动保存草稿
+  saveDraft(newWeights);
+};
+
+// 保存草稿
+const saveDraft = (weights) => {
+  emit('save-draft', weights, 'weights');
 };
 
 const balanceWeights = () => {
