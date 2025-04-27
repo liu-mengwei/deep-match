@@ -75,7 +75,9 @@
       <!-- 基础筛选页 -->
       <BasicFilter
         v-if="currentStep === 'basicFilter'"
+        :survey-data="surveyData"
         @complete="completeFilter"
+        @save-draft="saveDraft"
         @back="currentStep = 'questions'"
         @next="currentStep = 'weights'"
       />

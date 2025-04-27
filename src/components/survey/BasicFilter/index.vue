@@ -71,7 +71,7 @@
     <!-- 导航按钮 -->
     <div class="navigation-buttons">
       <button class="prev-button" @click="emit('back')">上一步</button>
-      <button class="next-button" @click="emit('next')">下一步</button>
+      <button class="next-button" @click="nextStep">下一步</button>
     </div>
 
     <!-- 提示信息 -->
@@ -93,12 +93,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import PreferenceItem from './PreferenceItem.vue';
 import MatchImpactAnalysis from './MatchImpactAnalysis.vue';
 
 // 定义emit
 const emit = defineEmits(['back', 'next']);
+
+const isSaving = ref(false);
+
+const props = defineProps({
+  surveyData: {
+    type: Object,
+    required: true,
+  },
+});
 
 // 定义偏好状态（所有默认设为 'prefer'）
 const preferences = reactive({
@@ -176,6 +185,47 @@ const processedCriticalFactors = computed(() => {
     return { name: factor, label, suggestion, impact };
   });
 });
+
+// 初始化时加载草稿数据
+onMounted(async () => {
+  loadDraft();
+});
+
+// 加载草稿
+const loadDraft = () => {
+  if (props?.surveyData?.preferences) {
+    // 从props合并数据
+    const draftPreferences = props?.surveyData?.preferences;
+
+    // 遍历每个偏好类别
+    Object.keys(preferences).forEach((key) => {
+      if (draftPreferences[key]) {
+        // 合并对象，保留原始值作为默认值
+        Object.assign(preferences[key], draftPreferences[key]);
+      }
+    });
+
+    // 重新计算匹配影响
+    calculateImpact();
+  }
+};
+
+// 保存草稿
+const saveDraft = async () => {
+  emit('save-draft', {
+    preferences: { ...preferences },
+    // 可以添加其他需要保存的数据
+    lastUpdated: new Date().toISOString(),
+  });
+};
+
+// 下一步
+const nextStep = async () => {
+  // 在进入下一步前保存草稿
+  await saveDraft();
+  // 触发下一步事件
+  emit('next');
+};
 
 // 监听偏好变化，重新计算匹配影响
 watch(

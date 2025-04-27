@@ -332,5 +332,73 @@ export default {
         },
       ],
     },
+    {
+      id: 'family',
+      title: '家庭情况',
+      description: '家庭背景对婚恋匹配非常重要，请如实填写',
+      defaultWeight: 15,
+      questions: [
+        {
+          id: 'parents_support',
+          type: 'radio',
+          label: '父母赡养情况',
+          required: true,
+          options: [
+            { value: 'no_need', label: '父母自给自足' },
+            { value: 'partial_support', label: '部分经济支持' },
+            { value: 'full_support', label: '完全赡养' },
+            { value: 'living_together', label: '共同生活并赡养' },
+          ],
+        },
+        {
+          id: 'household_registration',
+          type: 'radio',
+          label: '您的户籍类型',
+          required: true,
+          options: [
+            { value: 'urban_local', label: '本地城市户口' },
+            { value: 'urban_nonlocal', label: '外地城市户口' },
+            { value: 'rural_local', label: '本地农村户口' },
+            { value: 'rural_nonlocal', label: '外地农村户口' },
+          ],
+        },
+        {
+          id: 'family_income',
+          type: 'radio',
+          label: '家庭年收入范围',
+          required: true,
+          options: [
+            { value: 'below_100k', label: '10万以下' },
+            { value: '100k_200k', label: '10-20万' },
+            { value: '200k_500k', label: '20-50万' },
+            { value: 'above_500k', label: '50万以上' },
+          ],
+        },
+        {
+          id: 'family_relationship',
+          type: 'radio',
+          label: '您与家人的关系如何？',
+          required: true,
+          options: [
+            { value: 'very_close', label: '非常亲密，经常联系' },
+            { value: 'close', label: '关系良好，定期联系' },
+            { value: 'normal', label: '一般，偶尔联系' },
+            { value: 'distant', label: '较为疏远' },
+          ],
+        },
+        {
+          id: 'elderly_care',
+          type: 'radio',
+          label: '您对未来照顾长辈的看法是？',
+          required: true,
+          options: [
+            { value: 'live_together', label: '希望与父母同住' },
+            { value: 'nearby', label: '住在父母附近，方便照顾' },
+            { value: 'independent', label: '分开住，但会定期探望' },
+            { value: 'other_arrangements', label: '其他安排' },
+          ],
+        },
+      ],
+    },
   ],
 };

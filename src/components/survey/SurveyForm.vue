@@ -240,15 +240,10 @@ const updateAnswer = (questionId, value) => {
 
 // 手动保存草稿
 const saveDraft = async () => {
-  isSaving.value = true;
   emit('save-draft', { ...answers });
 
   // 分析并更新完成状态
   analyzeCompletedSections();
-
-  setTimeout(() => {
-    isSaving.value = false;
-  }, 1000);
 };
 </script>
 

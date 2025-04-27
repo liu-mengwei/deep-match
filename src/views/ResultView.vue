@@ -128,7 +128,7 @@ const shareResults = () => {
 </script>
 
 <style scoped lang="scss">
-@import '../assets/scss/variables';
+@use '../assets/scss/variables' as *;
 
 .result-container {
   width: 100%;

@@ -151,7 +151,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '../assets/scss/variables.scss';
+@use '../assets/scss/variables' as *;
 
 .questionnaire-container {
   width: 100%;
