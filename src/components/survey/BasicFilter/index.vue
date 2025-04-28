@@ -22,7 +22,8 @@
 
       <!-- 年龄范围 -->
       <PreferenceItem
-        v-model="preferences.age"
+        :modelValue="data.age"
+        @update:modelValue="updatePreference('age', $event)"
         title="期望年龄范围"
         type="range"
         minLabel="最小年龄"
@@ -33,7 +34,8 @@
 
       <!-- 身高范围 -->
       <PreferenceItem
-        v-model="preferences.height"
+        :modelValue="data.height"
+        @update:modelValue="updatePreference('height', $event)"
         title="期望身高范围"
         type="range"
         minLabel="最低身高"
@@ -45,7 +47,8 @@
 
       <!-- 学历要求 -->
       <PreferenceItem
-        v-model="preferences.education"
+        :modelValue="data.education"
+        @update:modelValue="updatePreference('education', $event)"
         title="学历要求"
         type="select"
         :options="educationLabels"
@@ -53,7 +56,8 @@
 
       <!-- 收入要求 -->
       <PreferenceItem
-        v-model="preferences.income"
+        :modelValue="data.income"
+        @update:modelValue="updatePreference('income', $event)"
         title="月收入要求"
         type="select"
         :options="incomeLabels"
@@ -61,7 +65,8 @@
 
       <!-- 是否接受离异 -->
       <PreferenceItem
-        v-model="preferences.acceptDivorced"
+        :modelValue="data.acceptDivorced"
+        @update:modelValue="updatePreference('acceptDivorced', $event)"
         title="是否接受离异"
         type="select"
         :options="acceptDivorcedLabels"
@@ -93,30 +98,29 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import PreferenceItem from './PreferenceItem.vue';
 import MatchImpactAnalysis from './MatchImpactAnalysis.vue';
 
 // 定义emit
-const emit = defineEmits(['back', 'next']);
+const emit = defineEmits(['back', 'complete', 'update:data']);
 
-const isSaving = ref(false);
-
+// 从props接收偏好数据
 const props = defineProps({
-  surveyData: {
+  data: {
     type: Object,
     required: true,
+    default: () => ({
+      age: { min: 25, max: 35, importance: 'prefer' },
+      height: { min: 160, max: 175, importance: 'prefer' },
+      education: { value: 'bachelor', importance: 'prefer' },
+      income: { value: 10000, importance: 'prefer' },
+      acceptDivorced: { value: 'single_only', importance: 'prefer' },
+    }),
   },
 });
 
-// 定义偏好状态（所有默认设为 'prefer'）
-const preferences = reactive({
-  age: { min: 25, max: 35, importance: 'prefer' },
-  height: { min: 160, max: 175, importance: 'prefer' },
-  education: { value: 'bachelor', importance: 'prefer' },
-  income: { value: 10000, importance: 'prefer' },
-  acceptDivorced: { value: 'single_only', importance: 'prefer' },
-});
+const showImpactAnalysis = ref(false);
 
 // 选项定义
 const educationLabels = {
@@ -144,39 +148,37 @@ const acceptDivorcedLabels = {
 };
 
 // 匹配影响状态
-const matchImpact = reactive({
+const matchImpact = ref({
   matchPool: 32,
   strongMatches: 12,
   criticalFactors: ['age', 'acceptDivorced'],
 });
 
-const showImpactAnalysis = ref(false);
-
 // 处理后的关键因素列表
 const processedCriticalFactors = computed(() => {
-  return matchImpact.criticalFactors.map((factor) => {
+  return matchImpact.value.criticalFactors.map((factor) => {
     let label = '';
     let suggestion = '';
     let impact = 0;
 
     switch (factor) {
       case 'age':
-        label = `年龄范围 (${preferences.age.min}-${preferences.age.max}岁)`;
+        label = `年龄范围 (${props.data.age.min}-${props.data.age.max}岁)`;
         suggestion = '建议：扩大年龄范围或降低重要性可增加匹配池';
         impact = 30;
         break;
       case 'height':
-        label = `身高范围 (${preferences.height.min}-${preferences.height.max}cm)`;
+        label = `身高范围 (${props.data.height.min}-${props.data.height.max}cm)`;
         suggestion = '建议：扩大身高范围或降低重要性';
         impact = 25;
         break;
       case 'education':
-        label = `学历要求 (${educationLabels[preferences.education.value]})`;
+        label = `学历要求 (${educationLabels[props.data.education.value]})`;
         suggestion = '建议：考虑降低学历要求的重要性';
         impact = 28;
         break;
       case 'acceptDivorced':
-        label = `接受离异情况 (${acceptDivorcedLabels[preferences.acceptDivorced.value]})`;
+        label = `接受离异情况 (${acceptDivorcedLabels[props.data.acceptDivorced.value]})`;
         suggestion = '建议：考虑调整为"希望满足"';
         impact = 20;
         break;
@@ -186,53 +188,41 @@ const processedCriticalFactors = computed(() => {
   });
 });
 
-// 初始化时加载草稿数据
-onMounted(async () => {
-  loadDraft();
-});
-
-// 加载草稿
-const loadDraft = () => {
-  if (props?.surveyData?.preferences) {
-    // 从props合并数据
-    const draftPreferences = props?.surveyData?.preferences;
-
-    // 遍历每个偏好类别
-    Object.keys(preferences).forEach((key) => {
-      if (draftPreferences[key]) {
-        // 合并对象，保留原始值作为默认值
-        Object.assign(preferences[key], draftPreferences[key]);
-      }
-    });
-
-    // 重新计算匹配影响
-    calculateImpact();
-  }
-};
-
-// 保存草稿
-const saveDraft = async () => {
-  // 准备要保存的数据对象
-  const basicFilterData = {
-    preferences: { ...preferences },
-    lastUpdated: new Date().toISOString(),
-  };
-
-  // 调用父组件的save-draft方法，传递BasicFilter数据
-  emit('save-draft', basicFilterData, 'basicFilter');
+// 更新偏好
+const updatePreference = (key, value) => {
+  debugger;
+  // 创建新的偏好对象
+  const updatedPreferences = { ...props.data };
+  // 更新指定键的值
+  updatedPreferences[key] = value;
+  // 发送更新事件
+  emit('update:data', updatedPreferences);
 };
 
 // 下一步
-const nextStep = async () => {
-  // 在进入下一步前保存草稿
-  await saveDraft();
+const nextStep = () => {
   // 触发下一步事件
-  emit('next');
+  emit('complete');
+};
+
+// 重置所有偏好设置
+const resetPreferences = () => {
+  // 创建默认偏好对象
+  const defaultPreferences = {
+    age: { min: 25, max: 35, importance: 'prefer' },
+    height: { min: 160, max: 175, importance: 'prefer' },
+    education: { value: 'bachelor', importance: 'prefer' },
+    income: { value: 10000, importance: 'prefer' },
+    acceptDivorced: { value: 'single_only', importance: 'prefer' },
+  };
+
+  // 发送更新事件
+  emit('update:data', defaultPreferences);
 };
 
 // 监听偏好变化，重新计算匹配影响
 watch(
-  preferences,
+  () => props.data,
   () => {
     calculateImpact();
   },
@@ -245,37 +235,37 @@ const calculateImpact = () => {
   let critical = [];
 
   // 年龄条件影响
-  const ageRange = preferences.age.max - preferences.age.min;
-  if (ageRange < 5 && preferences.age.importance === 'must') {
+  const ageRange = props.data.age.max - props.data.age.min;
+  if (ageRange < 5 && props.data.age.importance === 'must') {
     pool -= 30;
     critical.push('age');
-  } else if (ageRange < 10 && preferences.age.importance === 'must') {
+  } else if (ageRange < 10 && props.data.age.importance === 'must') {
     pool -= 15;
   }
 
   // 身高条件影响
-  if (preferences.height.importance === 'must') {
+  if (props.data.height.importance === 'must') {
     pool -= 25;
-    if (preferences.height.max - preferences.height.min < 10) {
+    if (props.data.height.max - props.data.height.min < 10) {
       critical.push('height');
     }
   }
 
   // 学历要求影响
-  if (preferences.education.value === 'master' && preferences.education.importance === 'must') {
+  if (props.data.education.value === 'master' && props.data.education.importance === 'must') {
     pool -= 28;
     critical.push('education');
   } else if (
-    preferences.education.value === 'bachelor' &&
-    preferences.education.importance === 'must'
+    props.data.education.value === 'bachelor' &&
+    props.data.education.importance === 'must'
   ) {
     pool -= 10;
   }
 
   // 接受离异影响
-  if (preferences.acceptDivorced.importance === 'must') {
+  if (props.data?.acceptDivorced?.importance === 'must') {
     pool -= 20;
-    if (preferences.acceptDivorced.value === 'single_only') {
+    if (props.data.acceptDivorced.value === 'single_only') {
       critical.push('acceptDivorced');
     }
   }
@@ -285,33 +275,11 @@ const calculateImpact = () => {
   const strong = Math.floor(pool * 0.4);
 
   // 更新状态
-  matchImpact.matchPool = pool;
-  matchImpact.strongMatches = strong;
-  matchImpact.criticalFactors = critical;
-};
-
-// 重置所有偏好设置
-const resetPreferences = () => {
-  // 重置为默认值
-  preferences.age.min = 25;
-  preferences.age.max = 35;
-  preferences.age.importance = 'prefer';
-
-  preferences.height.min = 160;
-  preferences.height.max = 175;
-  preferences.height.importance = 'prefer';
-
-  preferences.education.value = 'bachelor';
-  preferences.education.importance = 'prefer';
-
-  preferences.income.value = 10000;
-  preferences.income.importance = 'prefer';
-
-  preferences.acceptDivorced.value = 'single_only';
-  preferences.acceptDivorced.importance = 'prefer';
-
-  // 重新计算匹配影响
-  calculateImpact();
+  matchImpact.value = {
+    matchPool: pool,
+    strongMatches: strong,
+    criticalFactors: critical,
+  };
 };
 
 // 初始计算

@@ -25,7 +25,6 @@
     <p v-if="currentSection.description" class="section-description">
       {{ currentSection.description }}
     </p>
-
     <QuestionSection
       :section="currentSection"
       :answers="answers"
@@ -52,14 +51,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import QuestionSection from './QuestionSection.vue';
+import surveyData from '../../data/surveyData.js';
 
 // 接收props
 const props = defineProps({
-  surveyData: {
-    type: Object,
-    required: true,
-  },
-  initialAnswers: {
+  data: {
     type: Object,
     default: () => ({}),
   },
@@ -78,16 +74,16 @@ const completedSections = ref({});
 // 初始化答案对象和已完成部分
 onMounted(() => {
   // 如果有初始数据，用它填充answers对象
-  if (Object.keys(props.initialAnswers).length > 0) {
-    Object.keys(props.initialAnswers).forEach((key) => {
-      answers[key] = props.initialAnswers[key];
+  if (Object.keys(props.data).length > 0) {
+    Object.keys(props.data).forEach((key) => {
+      answers[key] = props.data[key];
     });
 
     // 分析哪些部分已经填写完成
     analyzeCompletedSections();
   } else {
     // 否则创建空的答案对象
-    props.surveyData.sections.forEach((section) => {
+    surveyData.sections.forEach((section) => {
       section.questions.forEach((question) => {
         if (question.type === 'checkbox') {
           answers[question.id] = [];
@@ -110,7 +106,7 @@ onMounted(() => {
 const analyzeCompletedSections = () => {
   const completed = {};
 
-  props.surveyData.sections.forEach((section, index) => {
+  surveyData.sections.forEach((section, index) => {
     // 检查该部分的所有必填题是否都已回答
     const requiredQuestions = section.questions.filter((q) => q.required);
     if (requiredQuestions.length === 0) {
@@ -133,7 +129,7 @@ const analyzeCompletedSections = () => {
 
     // 如果当前部分尚未完成，后续部分也标记为未完成
     if (!allAnswered) {
-      for (let i = index + 1; i < props.surveyData.sections.length; i++) {
+      for (let i = index + 1; i < surveyData.sections.length; i++) {
         completed[i] = false;
       }
       return; // 中断循环
@@ -144,13 +140,13 @@ const analyzeCompletedSections = () => {
 };
 
 const currentSection = computed(() => {
-  return props.surveyData.sections[currentSectionIndex.value];
+  return surveyData.sections[currentSectionIndex.value];
 });
 
 const isFirstSection = computed(() => currentSectionIndex.value === 0);
 
 const isLastSection = computed(() => {
-  return currentSectionIndex.value === props.surveyData.sections.length - 1;
+  return currentSectionIndex.value === surveyData.sections.length - 1;
 });
 
 // 验证当前部分的回答
@@ -194,7 +190,7 @@ const nextSection = () => {
   completedSections.value[currentSectionIndex.value] = true;
 
   // 下一部分设为可访问
-  if (currentSectionIndex.value + 1 < props.surveyData.sections.length) {
+  if (currentSectionIndex.value + 1 < surveyData.sections.length) {
     completedSections.value[currentSectionIndex.value + 1] = false;
   }
 

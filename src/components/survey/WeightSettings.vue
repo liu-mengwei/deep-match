@@ -24,7 +24,7 @@
     </div>
 
     <div class="weight-list">
-      <div v-for="section in sections" :key="section.id" class="weight-item">
+      <div v-for="section in weightableSections" :key="section.id" class="weight-item">
         <div class="weight-info">
           <h3>{{ section.title }}</h3>
           <p v-if="section.description" class="section-description">
@@ -73,14 +73,44 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+// 定义权重可调整的部分数据
+const weightableSections = [
+  {
+    id: 'partner_preferences',
+    title: '伴侣偏好',
+    description: '关于理想伴侣特质的偏好',
+    defaultWeight: 20,
+  },
+  {
+    id: 'values',
+    title: '核心价值观',
+    description: '金钱观、婚姻观等基本价值观的匹配',
+    defaultWeight: 25,
+  },
+  {
+    id: 'emotional_patterns',
+    title: '情感相处模式',
+    description: '情感表达和沟通方式的兼容性',
+    defaultWeight: 20,
+  },
+  {
+    id: 'lifestyle',
+    title: '生活习惯',
+    description: '日常生活习惯的契合度',
+    defaultWeight: 15,
+  },
+  {
+    id: 'future_planning',
+    title: '长期规划',
+    description: '对未来发展方向的一致性',
+    defaultWeight: 20,
+  },
+];
 
 // 接收props
 const props = defineProps({
-  sections: {
-    type: Array,
-    required: true,
-  },
   weights: {
     type: Object,
     required: true,

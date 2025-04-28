@@ -53,6 +53,7 @@
       </div>
 
       <!-- 多选题 -->
+
       <div v-else-if="question.type === 'checkbox'" class="checkbox-options">
         <div v-for="option in question.options" :key="option.value" class="checkbox-option">
           <input
@@ -60,7 +61,7 @@
             :id="`${question.id}_${option.value}`"
             :name="question.id"
             :value="option.value"
-            :checked="value.includes(option.value)"
+            :checked="value?.includes(option.value)"
             @change="updateValue"
           />
           <label :for="`${question.id}_${option.value}`">
@@ -164,7 +165,7 @@ const updateValue = (event) => {
     case 'checkbox':
       // 处理多选
       if (event.target.checked) {
-        value = [...props.value, event.target.value];
+        value = [...(props.value || []), event.target.value];
       } else {
         value = props.value.filter((v) => v !== event.target.value);
       }

@@ -4,47 +4,45 @@
     <header class="app-header">
       <h1>{{ surveyData.title }}</h1>
       <div class="progress-indicator" v-if="currentStep !== 'welcome'">
-        <div
-          class="step"
-          :class="{
-            active: currentStep === 'questions',
-            completed: basicInfoCompleted,
-          }"
-          @click="goToStep('questions')"
+        <StepTab
+          step="questions"
+          :is-active="currentStep === 'questions'"
+          :is-completed="basicInfoCompleted"
+          :is-clickable="true"
+          :is-disabled="false"
+          @click="goToStep"
         >
           基本信息
-        </div>
-        <div
-          class="step"
-          :class="{
-            active: currentStep === 'basicFilter',
-            clickable: basicInfoCompleted,
-            disabled: !basicInfoCompleted,
-          }"
-          @click="basicInfoCompleted && goToStep('basicFilter')"
+        </StepTab>
+        <StepTab
+          step="basicFilter"
+          :is-active="currentStep === 'basicFilter'"
+          :is-completed="false"
+          :is-clickable="basicInfoCompleted"
+          :is-disabled="!basicInfoCompleted"
+          @click="goToStep"
         >
           基本条件筛选
-        </div>
-        <div
-          class="step"
-          :class="{
-            active: currentStep === 'weights',
-            clickable: basicInfoCompleted,
-            disabled: !basicInfoCompleted,
-          }"
-          @click="basicInfoCompleted && goToStep('weights')"
+        </StepTab>
+        <StepTab
+          step="weights"
+          :is-active="currentStep === 'weights'"
+          :is-completed="false"
+          :is-clickable="basicInfoCompleted"
+          :is-disabled="!basicInfoCompleted"
+          @click="goToStep"
         >
           深度匹配设置
-        </div>
-        <div
-          class="step"
-          :class="{
-            active: currentStep === 'results',
-            disabled: true,
-          }"
+        </StepTab>
+        <StepTab
+          step="results"
+          :is-active="currentStep === 'results'"
+          :is-completed="false"
+          :is-clickable="false"
+          :is-disabled="true"
         >
           查看结果
-        </div>
+        </StepTab>
       </div>
     </header>
 
@@ -66,26 +64,23 @@
       <!-- 问卷填写页 -->
       <SurveyForm
         v-if="currentStep === 'questions'"
-        :survey-data="surveyData"
-        :initial-answers="basicInfo"
+        :data="basicInfo"
         @complete="completeSurvey"
-        @save-draft="saveDraft"
+        @save-draft="() => saveDraftWithCheck({ basicInfo })"
       />
 
       <!-- 基础筛选页 -->
       <BasicFilter
         v-if="currentStep === 'basicFilter'"
-        :survey-data="surveyData"
-        @complete="completeFilter"
-        @save-draft="saveDraft"
+        :data="basicFilter"
+        @update:data="updateBasicFilter"
         @back="currentStep = 'questions'"
-        @next="currentStep = 'weights'"
+        @complete="completeFilter"
       />
 
       <!-- 深度匹配设置页 -->
       <WeightSettings
         v-if="currentStep === 'weights'"
-        :sections="weightableSections"
         :weights="userWeights"
         :total-weight="totalWeight"
         @update-weights="updateWeights"
@@ -118,6 +113,7 @@ import {
   updateSurveyDraft,
   createSurveyDraft,
 } from '@/services/survey';
+import StepTab from '../components/common/StepTab.vue';
 
 const authStore = useAuthStore();
 
@@ -132,25 +128,18 @@ const isLoading = ref(true);
 // 添加问卷完成状态
 const basicInfoCompleted = ref(false);
 // 新增 basicFilter 变量
-const basicFilter = ref({});
-
-// 筛选出需要设置权重的部分（排除基本信息和个人习惯）
-const weightableSections = computed(() => {
-  // 只对这些板块设置权重：伴侣偏好、价值观、情感模式、生活习惯、未来规划
-  const weightableIds = [
-    'partner_preferences',
-    'values',
-    'emotional_patterns',
-    'lifestyle',
-    'future_planning',
-  ];
-  return surveyData.sections.filter((section) => weightableIds.includes(section.id));
+const basicFilter = ref({
+  age: { min: 25, max: 35, importance: 'prefer' },
+  height: { min: 160, max: 175, importance: 'prefer' },
+  education: { value: 'bachelor', importance: 'prefer' },
+  income: { value: 10000, importance: 'prefer' },
+  acceptDivorced: { value: 'single_only', importance: 'prefer' },
 });
 
 // 默认权重设置
 const initializeWeights = () => {
   const weights = {};
-  weightableSections.value.forEach((section) => {
+  surveyData.sections.forEach((section) => {
     weights[section.id] = section.defaultWeight;
   });
   userWeights.value = weights;
@@ -252,45 +241,6 @@ const startSurvey = async (useDraft) => {
   currentStep.value = 'questions';
 };
 
-// 修改保存草稿方法
-const saveDraft = async (answers, step) => {
-  // 根据当前步骤更新对应的数据
-  if (step === 'questions' || currentStep.value === 'questions') {
-    basicInfo.value = answers;
-  }
-
-  try {
-    // 构建根据当前步骤的草稿数据
-    let draftData = {};
-
-    if (currentStep.value === 'questions') {
-      draftData = {
-        basicInfo: basicInfo.value,
-      };
-    } else if (currentStep.value === 'basicFilter') {
-      draftData = {
-        basicFilter: answers,
-      };
-    } else if (currentStep.value === 'weights') {
-      draftData = {
-        weights: userWeights.value,
-      };
-    } else {
-      // 默认情况下保存所有数据
-      draftData = {
-        basicInfo: basicInfo.value,
-        weights: userWeights.value,
-      };
-    }
-
-    // 调用新的保存草稿方法
-    await saveDraftWithCheck(draftData);
-  } catch (error) {
-    console.error('保存草稿失败:', error);
-    // 可以添加失败提示
-  }
-};
-
 // 添加检查草稿存在的方法
 const saveDraftWithCheck = async (draftData) => {
   try {
@@ -314,30 +264,27 @@ const saveDraftWithCheck = async (draftData) => {
 const completeSurvey = (answers) => {
   basicInfo.value = answers;
   basicInfoCompleted.value = true; // 标记问卷已完成
-  currentStep.value = 'basicFilter';
   // 自动保存草稿
-  saveDraft(answers);
+  currentStep.value = 'basicFilter';
+};
+
+// 更新 basicFilter 的处理函数
+const updateBasicFilter = (newFilter) => {
+  basicFilter.value = newFilter;
 };
 
 // 完成 basicFilter 部分，进入权重设置
-const completeFilter = (filterData) => {
-  basicFilter.value = filterData;
+const completeFilter = () => {
+  // 在完成时保存草稿，使用当前的 basicFilter
+  saveDraftWithCheck({ basicFilter: basicFilter.value });
   currentStep.value = 'weights';
-  // 自动保存草稿
-  saveDraft(filterData, 'basicFilter');
-};
-
-// 从权重设置返回问卷填写页（保留数据）
-const backToSurvey = () => {
-  currentStep.value = 'questions';
-  // 不需要重新设置basicInfo，因为它已经包含用户填写的数据
 };
 
 // 更新权重设置
 const updateWeights = (weights) => {
   userWeights.value = weights;
   // 自动保存草稿
-  saveDraft(basicInfo.value);
+  // todo
 };
 
 // 提交问卷及权重
@@ -434,56 +381,6 @@ const goToStep = (step) => {
     height: 2px;
     background: #eee;
     z-index: 0;
-  }
-
-  .step {
-    position: relative;
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    font-size: 14px;
-    color: #999;
-    background: white;
-    z-index: 1;
-    border-radius: 4px;
-
-    // 添加可点击样式
-    &.clickable {
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:hover {
-        background-color: #f9f9f9;
-        color: #e74c3c;
-      }
-    }
-
-    &.active {
-      color: #e74c3c;
-      font-weight: bold;
-      border: 1px solid #e74c3c;
-    }
-
-    &.completed {
-      color: #2ecc71;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #f9f9f9;
-      }
-
-      &:after {
-        content: '✓';
-        display: inline-block;
-        margin-left: 4px;
-        font-weight: bold;
-      }
-    }
-
-    &.disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
   }
 }
 
