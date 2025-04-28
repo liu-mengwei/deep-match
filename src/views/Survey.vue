@@ -54,11 +54,11 @@
         <div v-if="hasDraft" class="draft-notice">
           <p>检测到您有未完成的问卷草稿</p>
           <div class="draft-actions">
-            <button class="secondary-button" @click="startSurvey(false)">重新开始</button>
-            <button class="primary-button" @click="startSurvey(true)">继续填写</button>
+            <button class="secondary-button" @click="startSurvey(true)">重新开始</button>
+            <button class="primary-button" @click="startSurvey(false)">继续填写</button>
           </div>
         </div>
-        <button v-else class="primary-button" @click="startSurvey(false)">开始填写</button>
+        <button v-else class="primary-button" @click="startSurvey(true)">开始填写</button>
       </div>
 
       <!-- 问卷填写页 -->
@@ -81,12 +81,10 @@
       <!-- 深度匹配设置页 -->
       <WeightSettings
         v-if="currentStep === 'weights'"
-        :weights="userWeights"
-        :total-weight="totalWeight"
-        @update-weights="updateWeights"
-        @submit="submitSurvey"
+        :data="userWeights"
+        @update:data="updateWeights"
         @back="currentStep = 'basicFilter'"
-        :is-submitting="isSubmitting"
+        @complete="completeWeights"
       />
 
       <!-- 结果页面 -->
@@ -96,14 +94,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
 // 更新导入路径
 import SurveyForm from '../components/survey/SurveyForm.vue';
 import WeightSettings from '../components/survey/WeightSettings.vue';
 import SurveyResults from '../components/survey/SurveyResults.vue';
 import surveyData from '../data/surveyData.js';
 // 导入API服务
-import apiService from '../services/apiService';
 import BasicFilter from '../components/survey/BasicFilter/index.vue';
 import { useAuthStore } from '@/stores/auth';
 import {
@@ -114,41 +110,41 @@ import {
   createSurveyDraft,
 } from '@/services/survey';
 import StepTab from '../components/common/StepTab.vue';
+import { cloneDeep } from 'lodash-es'; // 使用 lodash 的深拷贝功能
+
+const DEFAULT_FILTER = {
+  age: { min: 18, max: 99, importance: 'prefer' },
+  height: { min: 150, max: 200, importance: 'prefer' },
+  education: { value: '', importance: 'prefer' },
+  income: { value: '', importance: 'prefer' },
+  acceptDivorced: { value: '', importance: 'prefer' },
+};
+
+const DEFAULT_WEIGHTS = {
+  partner_preferences: 20,
+  values: 20,
+  emotional_patterns: 20,
+  lifestyle: 20,
+  future_planning: 20,
+};
 
 const authStore = useAuthStore();
 
 // 当前状态: 'welcome', 'questions', 'basicFilter', 'weights', 'results'
 const currentStep = ref('welcome');
+
 const basicInfo = ref({}); // 之前的 userAnswers
-const userWeights = ref({});
 const submitResult = ref(null);
+
 const isSubmitting = ref(false);
 const hasDraft = ref(false);
 const isLoading = ref(true);
+
 // 添加问卷完成状态
 const basicInfoCompleted = ref(false);
 // 新增 basicFilter 变量
-const basicFilter = ref({
-  age: { min: 25, max: 35, importance: 'prefer' },
-  height: { min: 160, max: 175, importance: 'prefer' },
-  education: { value: 'bachelor', importance: 'prefer' },
-  income: { value: 10000, importance: 'prefer' },
-  acceptDivorced: { value: 'single_only', importance: 'prefer' },
-});
-
-// 默认权重设置
-const initializeWeights = () => {
-  const weights = {};
-  surveyData.sections.forEach((section) => {
-    weights[section.id] = section.defaultWeight;
-  });
-  userWeights.value = weights;
-};
-
-// 计算总权重，确保为100%
-const totalWeight = computed(() => {
-  return Object.values(userWeights.value).reduce((sum, weight) => sum + weight, 0);
-});
+const basicFilter = ref(DEFAULT_FILTER);
+const userWeights = ref(DEFAULT_WEIGHTS); // 深度匹配设置的权重
 
 // 页面加载时检查是否有草稿和获取用户信息
 onMounted(async () => {
@@ -174,71 +170,32 @@ const checkForDraft = async () => {
         basicInfo.value = draft.basicInfo;
       }
       if (draft.basicFilter) {
-        basicFilter.value = draft.basicFilter; // 存储basicFilter数据，如果有的话
+        basicFilter.value = draft.basicFilter;
       }
       if (draft.weights) {
         userWeights.value = draft.weights;
-      } else {
-        initializeWeights(); // 如果没有权重数据，则初始化默认权重
       }
     } else {
       hasDraft.value = false;
-      initializeWeights(); // 初始化默认权重
     }
   } catch (error) {
     console.error('获取草稿失败:', error);
     hasDraft.value = false;
-    initializeWeights(); // 发生错误时，初始化默认权重
-  }
-};
-
-// 加载草稿数据
-const loadDraft = async () => {
-  try {
-    const draft = await getSurveyDraft();
-    if (draft) {
-      // 使用新的变量名
-      if (draft.basicInfo) {
-        basicInfo.value = draft.basicInfo;
-      }
-      if (draft.weights) {
-        userWeights.value = draft.weights;
-      } else {
-        initializeWeights();
-      }
-    } else {
-      initializeWeights();
-    }
-  } catch (error) {
-    console.error('加载草稿失败:', error);
-    initializeWeights();
   }
 };
 
 // 开始问卷
-const startSurvey = async (useDraft) => {
-  if (useDraft) {
-    await loadDraft();
-  } else {
-    // 初始化空答案
-    basicInfo.value = {};
-    surveyData.sections.forEach((section) => {
-      section.questions.forEach((question) => {
-        if (question.type === 'checkbox') {
-          basicInfo.value[question.id] = [];
-        } else if (question.type === 'rating') {
-          basicInfo.value[question.id] = null;
-        } else if (question.type === 'range') {
-          basicInfo.value[question.id] = { min: null, max: null };
-        } else {
-          basicInfo.value[question.id] = '';
-        }
-      });
-    });
-    initializeWeights();
-  }
-  basicInfoCompleted.value = false;
+const startSurvey = async (reset = false) => {
   currentStep.value = 'questions';
+
+  // 初始化空答案
+  if (reset) {
+    basicInfo.value = {};
+    basicFilter.value = cloneDeep(DEFAULT_FILTER); // 使用深拷贝，避免引用问题
+    userWeights.value = cloneDeep(DEFAULT_WEIGHTS); // 使用深拷贝，避免引用问题
+
+    basicInfoCompleted.value = false;
+  }
 };
 
 // 添加检查草稿存在的方法
@@ -283,40 +240,11 @@ const completeFilter = () => {
 // 更新权重设置
 const updateWeights = (weights) => {
   userWeights.value = weights;
-  // 自动保存草稿
-  // todo
 };
 
-// 提交问卷及权重
-const submitSurvey = async () => {
-  isSubmitting.value = true;
-
-  try {
-    // 构建提交数据
-    const submitData = {
-      basicInfo: basicInfo.value,
-      basicFilter: basicFilter.value,
-      weights: userWeights.value,
-    };
-
-    // 发送API请求
-    const response = await submit(submitData);
-
-    if (response.success) {
-      submitResult.value = response;
-      currentStep.value = 'results';
-
-      // 提交成功后清除草稿
-      await deleteSurveyDraft();
-    } else {
-      throw new Error('提交失败');
-    }
-  } catch (error) {
-    console.error('提交问卷出错:', error);
-    alert('提交问卷时出现错误，请稍后重试');
-  } finally {
-    isSubmitting.value = false;
-  }
+const completeWeights = () => {
+  // 在完成时保存草稿，使用当前的权重设置
+  saveDraftWithCheck({ weights: userWeights.value });
 };
 
 // 新增：直接跳转到指定步骤

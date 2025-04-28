@@ -37,7 +37,7 @@
             <input
               type="number"
               :id="`weight_${section.id}`"
-              :value="weights[section.id]"
+              :value="data[section.id]"
               @input="(e) => handleWeightUpdate(section.id, parseInt(e.target.value))"
               min="0"
               max="100"
@@ -49,7 +49,7 @@
           <div class="weight-slider-container">
             <input
               type="range"
-              :value="weights[section.id]"
+              :value="data[section.id]"
               @input="(e) => handleWeightUpdate(section.id, parseInt(e.target.value))"
               min="0"
               max="100"
@@ -111,78 +111,85 @@ const weightableSections = [
 
 // 接收props
 const props = defineProps({
-  weights: {
+  data: {
     type: Object,
     required: true,
-  },
-  totalWeight: {
-    type: Number,
-    required: true,
-  },
-  isSubmitting: {
-    type: Boolean,
-    default: false,
   },
 });
 
 // 定义emit
-const emit = defineEmits(['update-weights', 'submit', 'back', 'save-draft']);
+const emit = defineEmits(['update:data', 'back', 'complete']);
+
+// 在组件内部计算总权重
+const totalWeight = computed(() => {
+  return Object.values(props.data).reduce((sum, weight) => sum + weight, 0);
+});
 
 const isValid = computed(() => {
-  return props.totalWeight === 100;
+  return totalWeight.value === 100;
 });
 
 const weightStatus = computed(() => {
-  if (props.totalWeight < 100) return '低于';
-  if (props.totalWeight > 100) return '超过';
+  if (totalWeight.value < 100) return '低于';
+  if (totalWeight.value > 100) return '超过';
   return '等于';
 });
 
 const statusClass = computed(() => {
-  if (props.totalWeight < 100) return 'under';
-  if (props.totalWeight > 100) return 'over';
+  if (totalWeight.value < 100) return 'under';
+  if (totalWeight.value > 100) return 'over';
   return 'balanced';
 });
+
+// 组件内部管理提交状态
+const isSubmitting = ref(false);
 
 // 处理权重更新
 const handleWeightUpdate = (sectionId, newWeight) => {
   // 更新指定部分的权重
-  const newWeights = { ...props.weights };
-  newWeights[sectionId] = newWeight;
+  const newData = { ...props.data };
+  newData[sectionId] = newWeight;
 
   // 触发父组件中的更新方法
-  emit('update-weights', newWeights);
+  emit('update:data', newData);
 
   // 自动保存草稿
-  saveDraft(newWeights);
+  saveDraft(newData);
 };
 
 // 保存草稿
-const saveDraft = (weights) => {
-  emit('save-draft', weights, 'weights');
+const saveDraft = (data) => {
+  emit('save-draft', data, 'weights');
 };
 
 const balanceWeights = () => {
-  const sectionIds = Object.keys(props.weights);
+  const sectionIds = Object.keys(props.data);
   const targetWeight = Math.floor(100 / sectionIds.length);
 
-  const newWeights = { ...props.weights };
+  const newData = { ...props.data };
   sectionIds.forEach((id, index) => {
     // 最后一项处理余数
     if (index === sectionIds.length - 1) {
-      const currentSum = sectionIds.slice(0, -1).reduce((sum, id) => sum + newWeights[id], 0);
-      newWeights[id] = 100 - currentSum;
+      const currentSum = sectionIds.slice(0, -1).reduce((sum, id) => sum + newData[id], 0);
+      newData[id] = 100 - currentSum;
     } else {
-      newWeights[id] = targetWeight;
+      newData[id] = targetWeight;
     }
   });
 
-  emit('update-weights', newWeights);
+  emit('update:data', newData);
 };
 
-const handleSubmit = () => {
-  if (isValid.value) {
-    emit('submit');
+const handleSubmit = async () => {
+  isSubmitting.value = true;
+  try {
+    // 触发完成事件
+    emit('complete');
+  } finally {
+    // 延迟重置状态，以便可能的过渡效果完成
+    setTimeout(() => {
+      isSubmitting.value = false;
+    }, 500);
   }
 };
 
