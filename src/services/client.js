@@ -2,6 +2,32 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api/v1';
 
+// 简单的错误提示函数
+const showErrorMessage = (message) => {
+  // 可以使用 alert，或者在页面中创建一个临时元素显示错误
+  const errorDiv = document.createElement('div');
+  errorDiv.style.position = 'fixed';
+  errorDiv.style.top = '20px';
+  errorDiv.style.left = '50%';
+  errorDiv.style.transform = 'translateX(-50%)';
+  errorDiv.style.backgroundColor = '#ff4d4f';
+  errorDiv.style.color = 'white';
+  errorDiv.style.padding = '10px 20px';
+  errorDiv.style.borderRadius = '4px';
+  errorDiv.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+  errorDiv.style.zIndex = '9999';
+  errorDiv.textContent = message;
+
+  document.body.appendChild(errorDiv);
+
+  // 3秒后自动移除
+  setTimeout(() => {
+    if (document.body.contains(errorDiv)) {
+      document.body.removeChild(errorDiv);
+    }
+  }, 3000);
+};
+
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -35,8 +61,13 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     // 处理响应错误
-    // 请求设置时出现问题
-    console.error('请求错误', { code: error.status, message: error.response?.data?.message || '' });
+    const errorMsg = error.response?.data?.message || '服务器连接失败';
+    const errorCode = error.response?.status || '未知错误';
+
+    // 显示错误消息
+    showErrorMessage(`请求错误 (${errorCode}): ${errorMsg}`);
+
+    console.error('请求错误', { code: errorCode, message: errorMsg });
     return Promise.reject(error);
   },
 );

@@ -18,8 +18,6 @@
           step="basicFilter"
           :is-active="currentStep === 'basicFilter'"
           :is-completed="false"
-          :is-clickable="basicInfoCompleted"
-          :is-disabled="!basicInfoCompleted"
           @click="goToStep"
         >
           基本条件筛选
@@ -28,8 +26,6 @@
           step="weights"
           :is-active="currentStep === 'weights'"
           :is-completed="false"
-          :is-clickable="basicInfoCompleted"
-          :is-disabled="!basicInfoCompleted"
           @click="goToStep"
         >
           深度匹配设置
@@ -121,11 +117,11 @@ const DEFAULT_FILTER = {
 };
 
 const DEFAULT_WEIGHTS = {
-  partner_preferences: 20,
+  partnerPreferences: 20,
   values: 20,
-  emotional_patterns: 20,
+  emotionalPatterns: 20,
   lifestyle: 20,
-  future_planning: 20,
+  futurePlanning: 20,
 };
 
 const authStore = useAuthStore();
@@ -221,7 +217,6 @@ const saveDraftWithCheck = async (draftData) => {
 const completeSurvey = (answers) => {
   basicInfo.value = answers;
   basicInfoCompleted.value = true; // 标记问卷已完成
-  // 自动保存草稿
   currentStep.value = 'basicFilter';
 };
 

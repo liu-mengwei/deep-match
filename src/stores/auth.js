@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
         } else {
           res = await loginVerifyCode({
             phone: credentials.phone,
-            verification_code: credentials.verificationCode,
+            verificationCode: credentials.verificationCode,
           });
         }
 

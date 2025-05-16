@@ -256,10 +256,7 @@ const sendVerificationCode = async () => {
   }
 
   try {
-    sendingCode.value = true;
-
-    debugger;
-    // 模拟API请求
+    sendingCode.value = true; // 模拟API请求
     const res = await getVerifyCode({
       phone: formStep1.phone,
       type: 'reset_password',
@@ -352,8 +349,6 @@ const handleSubmit = async () => {
     try {
       isSubmitting.value = true;
 
-      // 模拟验证请求
-
       // 验证成功，进入下一步
       currentStep.value = 2;
     } catch (error) {
@@ -371,8 +366,8 @@ const handleSubmit = async () => {
       // 模拟重置密码请求
       await resetPassword({
         phone: formStep1.phone,
-        verification_code: formStep1.verificationCode,
-        new_password: formStep2.newPassword,
+        verificationCode: formStep1.verificationCode,
+        newPassword: formStep2.newPassword,
       });
 
       // 重置成功，显示成功页面

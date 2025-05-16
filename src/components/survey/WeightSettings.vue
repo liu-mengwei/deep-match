@@ -78,7 +78,7 @@ import { computed, ref } from 'vue';
 // 定义权重可调整的部分数据
 const weightableSections = [
   {
-    id: 'partner_preferences',
+    id: 'partnerPreferences',
     title: '伴侣偏好',
     description: '关于理想伴侣特质的偏好',
     defaultWeight: 20,
@@ -90,7 +90,7 @@ const weightableSections = [
     defaultWeight: 25,
   },
   {
-    id: 'emotional_patterns',
+    id: 'emotionalPatterns',
     title: '情感相处模式',
     description: '情感表达和沟通方式的兼容性',
     defaultWeight: 20,
@@ -102,7 +102,7 @@ const weightableSections = [
     defaultWeight: 15,
   },
   {
-    id: 'future_planning',
+    id: 'futurePlanning',
     title: '长期规划',
     description: '对未来发展方向的一致性',
     defaultWeight: 20,
