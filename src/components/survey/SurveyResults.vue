@@ -9,7 +9,7 @@
     </div>
 
     <!-- 匹配结果展示 -->
-    <div class="match-results" v-if="result.matches && result.matches.length">
+    <!-- <div class="match-results" v-if="result.matches && result.matches.length">
       <h3>您的潜在匹配</h3>
 
       <div class="match-list">
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="result-actions">
       <button class="primary-button" @click="window.location.reload()">返回首页</button>

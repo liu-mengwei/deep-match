@@ -104,6 +104,7 @@ import {
   submitSurvey as submit,
   updateSurveyDraft,
   createSurveyDraft,
+  submitDraft,
 } from '@/services/survey';
 import StepTab from '../components/common/StepTab.vue';
 import { cloneDeep } from 'lodash-es'; // 使用 lodash 的深拷贝功能
@@ -159,6 +160,9 @@ onMounted(async () => {
 const checkForDraft = async () => {
   try {
     const draft = await getSurveyDraft();
+
+    if (draft.status === 'submitted') currentStep.value = 'results'
+
     if (draft) {
       hasDraft.value = true;
       // 预加载草稿数据，避免后续重复加载
@@ -237,9 +241,19 @@ const updateWeights = (weights) => {
   userWeights.value = weights;
 };
 
-const completeWeights = () => {
+const completeWeights = async () => {
   // 在完成时保存草稿，使用当前的权重设置
-  saveDraftWithCheck({ weights: userWeights.value });
+  await saveDraftWithCheck({ weights: userWeights.value });
+
+  // 将草稿状态改为submitted
+  try {
+    await submitDraft();
+    // 成功提交后跳转到结果页面
+    currentStep.value = 'results';
+  } catch (error) {
+    console.error('提交草稿失败:', error);
+    // 可以添加错误处理，比如显示错误提示
+  }
 };
 
 // 新增：直接跳转到指定步骤

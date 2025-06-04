@@ -32,3 +32,9 @@ export async function getSubmittedSurvey() {
   const result = await apiClient.get(`/survey/result`);
   return result; // 这里是响应的data部分
 }
+
+// 提交草稿（将状态改为submitted）
+export async function submitDraft() {
+  const result = await apiClient.post('/survey/draft/submit');
+  return result;
+}
