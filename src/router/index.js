@@ -83,8 +83,6 @@ router.beforeEach((to, from, next) => {
   // 清除已过期的token
   clearInvalidToken();
 
-  // 使用更精确的验证方法
-  debugger;
   const isAuthenticated = isTokenValid();
 
   if (to.meta.requiresAuth && !isAuthenticated) {

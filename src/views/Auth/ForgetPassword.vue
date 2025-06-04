@@ -259,7 +259,7 @@ const sendVerificationCode = async () => {
     sendingCode.value = true; // 模拟API请求
     const res = await getVerifyCode({
       phone: formStep1.phone,
-      type: 'reset_password',
+      type: 'resetPassword',
     });
 
     console.log(res, '验证码');

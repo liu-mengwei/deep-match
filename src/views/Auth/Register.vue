@@ -273,7 +273,7 @@ const handleRegister = async () => {
 
     const { token, user } = await register({
       phone: form.phone,
-      verification_code: form.verificationCode,
+      verificationCode: form.verificationCode,
       password: form.password,
       gender: form.gender,
     });

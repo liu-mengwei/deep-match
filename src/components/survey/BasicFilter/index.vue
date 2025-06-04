@@ -190,7 +190,6 @@ const processedCriticalFactors = computed(() => {
 
 // 更新偏好
 const updatePreference = (key, value) => {
-  debugger;
   // 创建新的偏好对象
   const updatedPreferences = { ...props.data };
   // 更新指定键的值
