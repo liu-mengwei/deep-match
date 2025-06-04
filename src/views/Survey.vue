@@ -62,7 +62,7 @@
         v-if="currentStep === 'questions'"
         :data="basicInfo"
         @complete="completeSurvey"
-        @save-draft="() => saveDraftWithCheck({ basicInfo })"
+        @save-draft="(val) => saveDraftWithCheck({ basicInfo: val })"
       />
 
       <!-- 基础筛选页 -->
@@ -244,11 +244,6 @@ const completeWeights = () => {
 
 // 新增：直接跳转到指定步骤
 const goToStep = (step) => {
-  // 只有问卷完成后才能跳转到权重设置
-  if (step === 'weights' && !basicInfoCompleted.value) {
-    return;
-  }
-
   // 不能直接跳转到结果页面
   if (step === 'results') {
     return;
