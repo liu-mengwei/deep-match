@@ -115,6 +115,10 @@ const DEFAULT_FILTER = {
   education: { value: '', importance: 'prefer' },
   income: { value: '', importance: 'prefer' },
   acceptDivorced: { value: '', importance: 'prefer' },
+  acceptSmoking: { value: 'never_only', importance: 'prefer' },
+  acceptDrinking: { value: 'accept_socially', importance: 'prefer' },
+  acceptPets: { value: 'accept_all', importance: 'not_important' },
+  acceptSleep: { value: 'any', importance: 'not_important' }
 };
 
 const DEFAULT_WEIGHTS = {
@@ -161,7 +165,7 @@ const checkForDraft = async () => {
   try {
     const draft = await getSurveyDraft();
 
-    if (draft.status === 'submitted') currentStep.value = 'results'
+    if (draft.status === 'submitted') currentStep.value = 'results';
 
     if (draft) {
       hasDraft.value = true;

@@ -60,16 +60,52 @@
         @update:modelValue="updatePreference('income', $event)"
         title="月收入要求"
         type="select"
-        :options="incomeLabels"
+        :options="incomeFilterLabels"
       />
 
       <!-- 是否接受离异 -->
       <PreferenceItem
         :modelValue="data.acceptDivorced"
         @update:modelValue="updatePreference('acceptDivorced', $event)"
-        title="是否接受离异"
+        title="婚姻状况要求"
         type="select"
         :options="acceptDivorcedLabels"
+      />
+
+      <!-- 吸烟接受度 -->
+      <PreferenceItem
+        :modelValue="data.acceptSmoking"
+        @update:modelValue="updatePreference('acceptSmoking', $event)"
+        title="对方吸烟习惯"
+        type="select"
+        :options="acceptSmokingLabels"
+      />
+
+      <!-- 饮酒接受度 -->
+      <PreferenceItem
+        :modelValue="data.acceptDrinking"
+        @update:modelValue="updatePreference('acceptDrinking', $event)"
+        title="对方饮酒习惯"
+        type="select"
+        :options="acceptDrinkingLabels"
+      />
+
+      <!-- 宠物接受度 -->
+      <PreferenceItem
+        :modelValue="data.acceptPets"
+        @update:modelValue="updatePreference('acceptPets', $event)"
+        title="对方养宠物情况"
+        type="select"
+        :options="acceptPetLabels"
+      />
+
+      <!-- 作息习惯要求 -->
+      <PreferenceItem
+        :modelValue="data.acceptSleep"
+        @update:modelValue="updatePreference('acceptSleep', $event)"
+        title="对方作息习惯"
+        type="select"
+        :options="acceptSleepLabels"
       />
     </div>
 
@@ -98,9 +134,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import PreferenceItem from './PreferenceItem.vue';
 import MatchImpactAnalysis from './MatchImpactAnalysis.vue';
+import {
+  educationOptions,
+  incomeFilterOptions,
+  acceptDivorcedOptions,
+  acceptSmokingOptions,
+  acceptDrinkingOptions,
+  acceptPetOptions,
+  acceptSleepOptions
+} from '../../../data/optionsData';
 
 // 定义emit
 const emit = defineEmits(['back', 'complete', 'update:data']);
@@ -122,36 +167,20 @@ const props = defineProps({
 
 const showImpactAnalysis = ref(false);
 
-// 选项定义
-const educationLabels = {
-  high_school: '高中及以下',
-  college: '大专',
-  bachelor: '本科',
-  master: '硕士',
-  phd: '博士及以上',
-};
+// 使用统一的选项数据
+const educationLabels = educationOptions;
+const incomeFilterLabels = incomeFilterOptions;
+const acceptDivorcedLabels = acceptDivorcedOptions;
+const acceptSmokingLabels = acceptSmokingOptions;
+const acceptDrinkingLabels = acceptDrinkingOptions;
+const acceptPetLabels = acceptPetOptions;
+const acceptSleepLabels = acceptSleepOptions;
 
-const incomeLabels = {
-  5000: '5千以上/月',
-  8000: '8千以上/月',
-  10000: '1万以上/月',
-  15000: '1.5万以上/月',
-  20000: '2万以上/月',
-  30000: '3万以上/月',
-};
-
-const acceptDivorcedLabels = {
-  single_only: '只接受未婚',
-  divorced_no_children: '接受离异无子女',
-  divorced_with_children: '接受离异有子女',
-  any: '不限',
-};
-
-// 匹配影响状态
+// 匹配影响状态 - 使用静态数据替代模拟计算
 const matchImpact = ref({
-  matchPool: 32,
-  strongMatches: 12,
-  criticalFactors: ['age', 'acceptDivorced'],
+  matchPool: 75,
+  strongMatches: 30,
+  criticalFactors: ['age', 'education', 'acceptDivorced'],
 });
 
 // 处理后的关键因素列表
@@ -177,10 +206,25 @@ const processedCriticalFactors = computed(() => {
         suggestion = '建议：考虑降低学历要求的重要性';
         impact = 28;
         break;
+      case 'income':
+        label = `收入要求 (${incomeFilterLabels[props.data.income.value]})`;
+        suggestion = '建议：考虑降低收入要求或重要性';
+        impact = 35;
+        break;
       case 'acceptDivorced':
-        label = `接受离异情况 (${acceptDivorcedLabels[props.data.acceptDivorced.value]})`;
-        suggestion = '建议：考虑调整为"希望满足"';
+        label = `婚姻状况要求 (${acceptDivorcedLabels[props.data.acceptDivorced.value]})`;
+        suggestion = '建议：考虑接受更多婚姻状况或降低重要性';
         impact = 20;
+        break;
+      case 'acceptSmoking':
+        label = `吸烟习惯要求 (${acceptSmokingLabels[props.data.acceptSmoking.value]})`;
+        suggestion = '建议：考虑放宽对吸烟习惯的要求';
+        impact = 15;
+        break;
+      case 'acceptDrinking':
+        label = `饮酒习惯要求 (${acceptDrinkingLabels[props.data.acceptDrinking.value]})`;
+        suggestion = '建议：考虑放宽对饮酒习惯的要求';
+        impact = 12;
         break;
     }
 
@@ -211,78 +255,18 @@ const resetPreferences = () => {
     age: { min: 25, max: 35, importance: 'prefer' },
     height: { min: 160, max: 175, importance: 'prefer' },
     education: { value: 'bachelor', importance: 'prefer' },
-    income: { value: 10000, importance: 'prefer' },
+    income: { value: 'above_10k', importance: 'prefer' },
     acceptDivorced: { value: 'single_only', importance: 'prefer' },
+    // 新增选项的默认值
+    acceptSmoking: { value: 'never_only', importance: 'prefer' },
+    acceptDrinking: { value: 'accept_socially', importance: 'prefer' },
+    acceptPets: { value: 'accept_all', importance: 'not_important' },
+    acceptSleep: { value: 'any', importance: 'not_important' },
   };
 
   // 发送更新事件
   emit('update:data', defaultPreferences);
 };
-
-// 监听偏好变化，重新计算匹配影响
-watch(
-  () => props.data,
-  () => {
-    calculateImpact();
-  },
-  { deep: true },
-);
-
-// 模拟计算匹配影响
-const calculateImpact = () => {
-  let pool = 100;
-  let critical = [];
-
-  // 年龄条件影响
-  const ageRange = props.data.age.max - props.data.age.min;
-  if (ageRange < 5 && props.data.age.importance === 'must') {
-    pool -= 30;
-    critical.push('age');
-  } else if (ageRange < 10 && props.data.age.importance === 'must') {
-    pool -= 15;
-  }
-
-  // 身高条件影响
-  if (props.data.height.importance === 'must') {
-    pool -= 25;
-    if (props.data.height.max - props.data.height.min < 10) {
-      critical.push('height');
-    }
-  }
-
-  // 学历要求影响
-  if (props.data.education.value === 'master' && props.data.education.importance === 'must') {
-    pool -= 28;
-    critical.push('education');
-  } else if (
-    props.data.education.value === 'bachelor' &&
-    props.data.education.importance === 'must'
-  ) {
-    pool -= 10;
-  }
-
-  // 接受离异影响
-  if (props.data?.acceptDivorced?.importance === 'must') {
-    pool -= 20;
-    if (props.data.acceptDivorced.value === 'single_only') {
-      critical.push('acceptDivorced');
-    }
-  }
-
-  // 确保数值在合理范围内
-  pool = Math.max(5, pool);
-  const strong = Math.floor(pool * 0.4);
-
-  // 更新状态
-  matchImpact.value = {
-    matchPool: pool,
-    strongMatches: strong,
-    criticalFactors: critical,
-  };
-};
-
-// 初始计算
-calculateImpact();
 </script>
 
 <style scoped lang="scss">

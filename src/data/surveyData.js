@@ -39,6 +39,18 @@ export default {
           required: true,
         },
         {
+          id: 'marital_status',
+          type: 'radio',
+          label: '您的婚姻状况',
+          required: true,
+          options: [
+            { value: 'single_only', label: '未婚' },
+            { value: 'divorced_no_children', label: '离异无子女' },
+            { value: 'divorced_with_children', label: '离异有子女' },
+            { value: 'widowed', label: '丧偶' },
+          ],
+        },
+        {
           id: 'education',
           type: 'radio',
           label: '您的教育程度',
