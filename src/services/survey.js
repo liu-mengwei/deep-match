@@ -23,18 +23,24 @@ export async function deleteSurveyDraft() {
   return result; // 这里是响应的data部分
 }
 
-export async function submitSurvey(data) {
-  const result = await apiClient.post('/survey/submit', data);
-  return result; // 这里是响应的data部分
-}
-
 export async function getSubmittedSurvey() {
   const result = await apiClient.get(`/survey/result`);
   return result; // 这里是响应的data部分
 }
 
 // 提交草稿（将状态改为submitted）
-export async function submitDraft() {
-  const result = await apiClient.post('/survey/draft/submit');
+export async function updateDraftStatus(status) {
+  const result = await apiClient.put('/survey/draft/status', { status });
   return result;
 }
+
+// 获取匹配结果的方法
+export const getMatchResults = async () => {
+  try {
+    const response = await apiClient.get('/matches/results');
+    return response.data;
+  } catch (error) {
+    console.error('获取匹配结果失败:', error);
+    throw error;
+  }
+};

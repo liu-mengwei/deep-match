@@ -1,17 +1,21 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
+import { clearInvalidToken, isTokenValid } from '@/utils/auth';
+import Home from '@/views/Home.vue';
 import PhotoAnalysis from '@/views/PhotoAnalysis.vue';
 import QuestionnaireView from '@/views/QuestionnaireView.vue';
 import ResultView from '@/views/ResultView.vue';
-import Survey from '@/views/Survey.vue';
-import { clearInvalidToken, isTokenValid } from '@/utils/auth';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/survey',
+      redirect: '/home',
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: Home,
     },
     {
       path: '/questions',
@@ -32,9 +36,13 @@ const router = createRouter({
     },
     {
       path: '/survey',
-      name: 'survey',
-      component: Survey,
-      meta: { requiresAuth: true },
+      name: 'Survey',
+      component: () => import('../views/Survey.vue'),
+    },
+    {
+      path: '/match-results',
+      name: 'MatchResults',
+      component: () => import('../views/MatchResults.vue'),
     },
     {
       path: '/login',

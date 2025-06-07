@@ -30,15 +30,6 @@
         >
           深度匹配设置
         </StepTab>
-        <StepTab
-          step="results"
-          :is-active="currentStep === 'results'"
-          :is-completed="false"
-          :is-clickable="false"
-          :is-disabled="true"
-        >
-          查看结果
-        </StepTab>
       </div>
     </header>
 
@@ -82,29 +73,25 @@
         @back="currentStep = 'basicFilter'"
         @complete="completeWeights"
       />
-
-      <!-- 结果页面 -->
-      <SurveyResults v-if="currentStep === 'results'" :result="submitResult" />
     </main>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 // 更新导入路径
 import SurveyForm from '../components/survey/SurveyForm.vue';
 import WeightSettings from '../components/survey/WeightSettings.vue';
-import SurveyResults from '../components/survey/SurveyResults.vue';
 import surveyData from '../data/surveyData.js';
 // 导入API服务
 import BasicFilter from '../components/survey/BasicFilter/index.vue';
 import { useAuthStore } from '@/stores/auth';
 import {
   getSurveyDraft,
-  deleteSurveyDraft,
-  submitSurvey as submit,
   updateSurveyDraft,
   createSurveyDraft,
-  submitDraft,
+  updateDraftStatus,
 } from '@/services/survey';
 import StepTab from '../components/common/StepTab.vue';
 import { cloneDeep } from 'lodash-es'; // 使用 lodash 的深拷贝功能
@@ -129,13 +116,13 @@ const DEFAULT_WEIGHTS = {
   futurePlanning: 20,
 };
 
+const router = useRouter();
 const authStore = useAuthStore();
 
-// 当前状态: 'welcome', 'questions', 'basicFilter', 'weights', 'results'
+// 当前状态: 'welcome', 'questions', 'basicFilter', 'weights'
 const currentStep = ref('welcome');
 
 const basicInfo = ref({}); // 之前的 userAnswers
-const submitResult = ref(null);
 
 const isSubmitting = ref(false);
 const hasDraft = ref(false);
@@ -164,8 +151,6 @@ onMounted(async () => {
 const checkForDraft = async () => {
   try {
     const draft = await getSurveyDraft();
-
-    if (draft.status === 'submitted') currentStep.value = 'results';
 
     if (draft) {
       hasDraft.value = true;
@@ -251,9 +236,9 @@ const completeWeights = async () => {
 
   // 将草稿状态改为submitted
   try {
-    await submitDraft();
+    await updateDraftStatus("submitted");
     // 成功提交后跳转到结果页面
-    currentStep.value = 'results';
+    router.push('/match-results');
   } catch (error) {
     console.error('提交草稿失败:', error);
     // 可以添加错误处理，比如显示错误提示
@@ -262,11 +247,6 @@ const completeWeights = async () => {
 
 // 新增：直接跳转到指定步骤
 const goToStep = (step) => {
-  // 不能直接跳转到结果页面
-  if (step === 'results') {
-    return;
-  }
-
   currentStep.value = step;
 };
 </script>

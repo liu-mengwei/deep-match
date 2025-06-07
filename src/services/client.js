@@ -68,6 +68,7 @@ apiClient.interceptors.response.use(
     showErrorMessage(`请求错误 (${errorCode}): ${errorMsg}`);
 
     console.error('请求错误', { code: errorCode, message: errorMsg });
+
     return Promise.reject(error);
   },
 );
